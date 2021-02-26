@@ -1,21 +1,38 @@
 {
-  "name": "ip",
-  "version": "1.1.5",
-  "author": "Fedor Indutny <fedor@indutny.com>",
-  "homepage": "https://github.com/indutny/node-ip",
+  "name": "ip-es",
+  "version": "1.0.0",
+  "author": "loynoir",
+  "homepage": "https://github.com/loynoir/ip-es",
   "repository": {
     "type": "git",
-    "url": "http://github.com/indutny/node-ip.git"
+    "url": "git+ssh://git@github.com/loynoir/ip-es.git"
   },
-  "main": "lib/ip",
+  "main": "lib/ip.js",
+  "module": "lib/es/ip.mjs",
+  "types": "types/ip.d.ts",
+  "browser": "dst/ip.min.js",
+  "entry": "dst/ip.min.mjs",
   "devDependencies": {
+    "@types/node": "^14.14.31",
     "jscs": "^2.1.1",
     "jshint": "^2.8.0",
-    "mocha": "~1.3.2"
+    "mocha": "^1.21.5"
   },
   "scripts": {
     "test": "jscs lib/*.js test/*.js && jshint lib/*.js && mocha --reporter spec test/*-test.js",
     "fix": "jscs lib/*.js test/*.js --fix"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "os-browserify": "^0.3.0"
+  },
+  "description": "[![](https://badge.fury.io/js/ip.svg)](https://www.npmjs.com/package/ip)",
+  "bugs": {
+    "url": "https://github.com/indutny/node-ip/issues"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  }
 }

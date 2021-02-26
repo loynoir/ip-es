@@ -1,34 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isV4Format = IPES_isV4Format;
-exports.isV6Format = IPES_isV6Format;
-exports.toBuffer = IPES_toBuffer;
-exports.toString = IPES_toString;
-exports._normalizeFamily = IPES__normalizeFamily;
-exports.fromPrefixLen = IPES_fromPrefixLen;
-exports.mask = IPES_mask;
-exports.cidr = IPES_cidr;
-exports.toLong = IPES_toLong;
-exports.fromLong = IPES_fromLong;
-exports.subnet = IPES_subnet;
-exports.cidrSubnet = IPES_cidrSubnet;
-exports.not = IPES_not;
-exports.or = IPES_or;
-exports.isEqual = IPES_isEqual;
-exports.isPrivate = IPES_isPrivate;
-exports.isPublic = IPES_isPublic;
-exports.isLoopback = IPES_isLoopback;
-exports.loopback = IPES_loopback;
-exports.address = IPES_address;
-exports.ipv6Regex = exports.IPES_ipv6Regex = exports.ipv4Regex = exports.IPES_ipv4Regex = void 0;
-
-var _buffer = require("buffer");
-
-var _os = require("os");
-
 /* eslint-disable no-bitwise */
 
 /* eslint-disable no-plusplus */
@@ -36,36 +5,36 @@ var _os = require("os");
 /* eslint-disable no-mixed-operators */
 
 /* eslint-disable operator-assignment */
-const IPES_ipv4Regex = /^(\d{1,3}\.){3,3}\d{1,3}$/;
-exports.ipv4Regex = exports.IPES_ipv4Regex = IPES_ipv4Regex;
-const IPES_ipv6Regex = /^(::)?(((\d{1,3}\.){3}(\d{1,3}){1})?([0-9a-f]){0,4}:{0,2}){1,8}(::)?$/i;
-exports.ipv6Regex = exports.IPES_ipv6Regex = IPES_ipv6Regex;
+import { Buffer } from 'buffer';
+import { networkInterfaces } from 'os';
+export const IPES_ipv4Regex = /^(\d{1,3}\.){3,3}\d{1,3}$/;
+export const IPES_ipv6Regex = /^(::)?(((\d{1,3}\.){3}(\d{1,3}){1})?([0-9a-f]){0,4}:{0,2}){1,8}(::)?$/i;
 
-function IPES_isV4Format(ip) {
+function IPES_isV4Format(ip: string): boolean {
   return IPES_ipv4Regex.test(ip);
 }
 
-function IPES_isV6Format(ip) {
+function IPES_isV6Format(ip: string): boolean {
   return IPES_ipv6Regex.test(ip);
 }
 
-function IPES_toBuffer(ip, buff, offset) {
+function IPES_toBuffer(ip: string, buff?: Buffer, offset?: number): Buffer {
   let _offset = ~~offset;
 
-  let result;
+  let result: Buffer;
 
   if (IPES_isV4Format(ip)) {
-    result = buff || _buffer.Buffer.alloc(_offset + 4);
+    result = buff || Buffer.alloc(_offset + 4);
     ip.split(/\./g).forEach(byte => {
       result[_offset++] = parseInt(byte, 10) & 0xff;
     });
   } else if (IPES_isV6Format(ip)) {
     const sections = ip.split(':', 8);
-    let i;
+    let i: number;
 
     for (i = 0; i < sections.length; i++) {
       const isv4 = IPES_isV4Format(sections[i]);
-      let v4Buffer;
+      let v4Buffer: Buffer;
 
       if (isv4) {
         v4Buffer = IPES_toBuffer(sections[i]);
@@ -84,7 +53,7 @@ function IPES_toBuffer(ip, buff, offset) {
     } else if (sections.length < 8) {
       for (i = 0; i < sections.length && sections[i] !== ''; i++);
 
-      const argv = [i, 1];
+      const argv: Array<number | string> = [i, 1];
 
       for (i = 9 - sections.length; i > 0; i--) {
         argv.push('0');
@@ -93,7 +62,7 @@ function IPES_toBuffer(ip, buff, offset) {
       sections.splice.apply(sections, argv);
     }
 
-    result = buff || _buffer.Buffer.alloc(_offset + 16);
+    result = buff || Buffer.alloc(_offset + 16);
 
     for (i = 0; i < sections.length; i++) {
       const word = parseInt(sections[i], 16);
@@ -109,13 +78,13 @@ function IPES_toBuffer(ip, buff, offset) {
   return result;
 }
 
-function IPES_toString(buff, offset, length) {
+function IPES_toString(buff: Buffer, offset?: number, length?: number): string {
   const _offset = ~~offset;
 
   const _length = length || buff.length - _offset;
 
   const result = [];
-  let ret;
+  let ret: string;
   let i;
 
   if (_length === 4) {
@@ -139,11 +108,11 @@ function IPES_toString(buff, offset, length) {
   return ret;
 }
 
-function IPES__normalizeFamily(family) {
+function IPES__normalizeFamily(family: string): string {
   return family ? family.toLowerCase() : 'ipv4';
 }
 
-function IPES_fromPrefixLen(prefixlen, family) {
+function IPES_fromPrefixLen(prefixlen: number, family?: string): string {
   let _prefixlen = prefixlen;
 
   const _family = _prefixlen > 32 ? 'ipv6' : IPES__normalizeFamily(family);
@@ -154,7 +123,7 @@ function IPES_fromPrefixLen(prefixlen, family) {
     len = 16;
   }
 
-  const buff = _buffer.Buffer.alloc(len);
+  const buff = Buffer.alloc(len);
 
   for (let i = 0, n = buff.length; i < n; ++i) {
     let bits = 8;
@@ -170,12 +139,10 @@ function IPES_fromPrefixLen(prefixlen, family) {
   return IPES_toString(buff);
 }
 
-function IPES_mask(addr, mask) {
+function IPES_mask(addr: string, mask: string): string {
   const baddr = IPES_toBuffer(addr);
   const bmask = IPES_toBuffer(mask);
-
-  const result = _buffer.Buffer.alloc(Math.max(baddr.length, bmask.length));
-
+  const result = Buffer.alloc(Math.max(baddr.length, bmask.length));
   let i = 0; // Same protocol - do bitwise and
 
   if (baddr.length === bmask.length) {
@@ -210,7 +177,7 @@ function IPES_mask(addr, mask) {
   return IPES_toString(result);
 }
 
-function IPES_cidr(cidrString) {
+function IPES_cidr(cidrString: string): string {
   const cidrParts = cidrString.split('/');
   const addr = cidrParts[0];
   if (cidrParts.length !== 2) throw new Error(`invalid CIDR subnet: ${addr}`);
@@ -218,7 +185,7 @@ function IPES_cidr(cidrString) {
   return IPES_mask(addr, mask);
 }
 
-function IPES_toLong(ip) {
+function IPES_toLong(ip: string): number {
   let ipl = 0;
   ip.split('.').forEach(octet => {
     ipl <<= 8;
@@ -227,11 +194,11 @@ function IPES_toLong(ip) {
   return ipl >>> 0;
 }
 
-function IPES_fromLong(ipl) {
+function IPES_fromLong(ipl: number): string {
   return `${ipl >>> 24}.${ipl >> 16 & 255}.${ipl >> 8 & 255}.${ipl & 255}`;
 }
 
-function IPES_subnet(addr, mask) {
+function IPES_subnet(addr: string, mask: string) {
   const networkAddress = IPES_toLong(IPES_mask(addr, mask)); // Calculate the mask's length.
 
   const maskBuffer = IPES_toBuffer(mask);
@@ -261,14 +228,14 @@ function IPES_subnet(addr, mask) {
     numHosts: numberOfAddresses <= 2 ? numberOfAddresses : numberOfAddresses - 2,
     length: numberOfAddresses,
 
-    contains(other) {
+    contains(other: string) {
       return networkAddress === IPES_toLong(IPES_mask(other, mask));
     }
 
   };
 }
 
-function IPES_cidrSubnet(cidrString) {
+function IPES_cidrSubnet(cidrString: string) {
   const cidrParts = cidrString.split('/');
   const addr = cidrParts[0];
   if (cidrParts.length !== 2) throw new Error(`invalid CIDR subnet: ${addr}`);
@@ -276,7 +243,7 @@ function IPES_cidrSubnet(cidrString) {
   return IPES_subnet(addr, mask);
 }
 
-function IPES_not(addr) {
+function IPES_not(addr: string): string {
   let i;
   const buff = IPES_toBuffer(addr);
 
@@ -287,7 +254,7 @@ function IPES_not(addr) {
   return IPES_toString(buff);
 }
 
-function IPES_or(a, b) {
+function IPES_or(a: string, b: string): string {
   let i;
   const ba = IPES_toBuffer(a);
   const bb = IPES_toBuffer(b); // same protocol
@@ -317,7 +284,7 @@ function IPES_or(a, b) {
   return IPES_toString(buff);
 }
 
-function IPES_isEqual(a, b) {
+function IPES_isEqual(a: string, b: string): boolean {
   let i;
   let ba = IPES_toBuffer(a);
   let bb = IPES_toBuffer(b); // Same protocol
@@ -352,22 +319,22 @@ function IPES_isEqual(a, b) {
   return true;
 }
 
-function IPES_isPrivate(addr) {
+function IPES_isPrivate(addr: string): boolean {
   // TODO: maybe :)
   // FIXME: upstream indutny/node-ip version 1.1.5 test fail
   // ref: https://github.com/python/cpython/blob/6c4c11763fad106e43cdcfdbe3bd33ea2765a13f/Lib/ipaddress.py#L1081
   return /^(::f{4}:)?10\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) || /^(::f{4}:)?192\.168\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) || /^(::f{4}:)?172\.(1[6-9]|2\d|30|31)\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) || /^(::f{4}:)?127\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) || /^(::f{4}:)?169\.254\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) || /^f[cd][0-9a-f]{2}:/i.test(addr) || /^fe80:/i.test(addr) || /^::1$/.test(addr) || /^::$/.test(addr);
 }
 
-function IPES_isPublic(addr) {
+function IPES_isPublic(addr: string): boolean {
   return !IPES_isPrivate(addr);
 }
 
-function IPES_isLoopback(addr) {
+function IPES_isLoopback(addr: string): boolean {
   return /^(::f{4}:)?127\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/.test(addr) || /^fe80::1$/.test(addr) || /^::1$/.test(addr) || /^::$/.test(addr);
 }
 
-function IPES_loopback(family) {
+function IPES_loopback(family: string): string {
   //
   // Default to `ipv4`
   //
@@ -395,8 +362,8 @@ function IPES_loopback(family) {
 //
 
 
-function IPES_address(name, family) {
-  const interfaces = (0, _os.networkInterfaces)(); //
+function IPES_address(name?: string, family?: string) {
+  const interfaces = networkInterfaces(); //
   // Default to `ipv4`
   //
 
@@ -437,3 +404,5 @@ function IPES_address(name, family) {
   }).filter(Boolean);
   return !all.length ? IPES_loopback(_family) : all[0];
 }
+
+export { IPES_ipv4Regex as ipv4Regex, IPES_ipv6Regex as ipv6Regex, IPES_isV4Format as isV4Format, IPES_isV6Format as isV6Format, IPES_toBuffer as toBuffer, IPES_toString as toString, IPES__normalizeFamily as _normalizeFamily, IPES_fromPrefixLen as fromPrefixLen, IPES_mask as mask, IPES_cidr as cidr, IPES_toLong as toLong, IPES_fromLong as fromLong, IPES_subnet as subnet, IPES_cidrSubnet as cidrSubnet, IPES_not as not, IPES_or as or, IPES_isEqual as isEqual, IPES_isPrivate as isPrivate, IPES_isPublic as isPublic, IPES_isLoopback as isLoopback, IPES_loopback as loopback, IPES_address as address };
