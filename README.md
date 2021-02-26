@@ -11,7 +11,7 @@ ip.address();
 
 2. ESM support. Now enjoy tree shaking. :)
 ```js
-import {address} from 'ip';
+import {address} from 'ip-es/lib/es';
 address();
 ```
 

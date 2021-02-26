@@ -7,11 +7,11 @@
     "type": "git",
     "url": "git+ssh://git@github.com/loynoir/ip-es.git"
   },
-  "main": "lib/ip.js",
-  "module": "lib/es/ip.mjs",
-  "types": "types/ip.d.ts",
-  "browser": "dst/ip.min.js",
-  "entry": "dst/ip.min.mjs",
+  "main": "lib/index.js",
+  "module": "lib/es/index.mjs",
+  "types": "types/index.d.ts",
+  "browser": "dst/index.min.js",
+  "entry": "dst/index.min.mjs",
   "devDependencies": {
     "@types/node": "^14.14.31",
     "jscs": "^2.1.1",
