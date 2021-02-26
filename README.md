@@ -5,7 +5,7 @@ IP address utilities for node.js, support cjs/esm/ts.
 # Feature
 1. CJS support
 ```js
-const ip = require('ip');
+const ip = require('ip-es');
 ip.address();
 ```
 
